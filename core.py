@@ -12,7 +12,7 @@ class Player:
 
 @dataclass
 class GameState:
-    """Class for keeping track of player score."""
+    """Class for keeping track of game state."""
     word: str
     guessed_letters: Set[chr] = field(default_factory=set)
 
