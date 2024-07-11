@@ -56,8 +56,12 @@ class GamesRunner:
     def updateWinner(self, game: Game):
         self.games_index += 1
         winner = 0
-        while winner+1 < self.players_count & game.players[winner].score < game.players[winner+1].score:
-            winner += 1
+        top_score = game.players[winner].score
+        for x in range(self.players_count):
+            if game.players[x].score >= top_score:
+                winner = x
+                top_score = game.players[x].score
+        
         print(f"{game.players[winner].name} - You Won!")
         self.players_scores[winner] += 1
 

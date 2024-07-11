@@ -69,6 +69,7 @@ class Game:
                     newGuess = False
 
                 elif guess[0] == "*" and guess[1:] == state.word:
+                    player.updateScore()
                     print(f"Congratulations! You guessed the word '{state.word}'.")
                     return True
                 
