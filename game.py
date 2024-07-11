@@ -55,11 +55,20 @@ class Game:
             
             else:
                 newGuess = True
+
+                if guess[0] == "*" and guess[1:] == state.word:
+                    diff = set(self.game_state.word) - self.game_state.guessed_letters
+                    state.guessed_letters.update(diff)
+                    
+                    player.updateScore(len(diff))
+                    print(f"Congratulations! You guessed the word '{state.word}'.")
+                    self.printStats()
+                    return True
+                
                 state.guessed_letters.add(guess)
 
                 if guess in state.word:
                     player.updateScore()
-
                     if set(state.word) <= state.guessed_letters:
                         print(f"Congratulations! You guessed the word '{state.word}'.")
                         return True
@@ -67,11 +76,6 @@ class Game:
                     print(f"You got it right!, if you want to type the whole word - enter *<word>")
                     state.printCurrentState()
                     newGuess = False
-
-                elif guess[0] == "*" and guess[1:] == state.word:
-                    player.updateScore()
-                    print(f"Congratulations! You guessed the word '{state.word}'.")
-                    return True
                 
             self.printStats()
                 

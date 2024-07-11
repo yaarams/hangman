@@ -7,8 +7,8 @@ class Player:
     name: str
     score: int = 0
 
-    def updateScore(self):
-        self.score = self.score + 1
+    def updateScore(self, count: int = 1):
+        self.score = self.score + count
 
 @dataclass
 class GameState:
