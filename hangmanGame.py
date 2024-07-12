@@ -6,7 +6,10 @@ from core import Player
 from game import Game
 
 class GameInitiator:
-    def parse_args(self):
+    """Class for initiating the game."""
+
+    @staticmethod
+    def parse_args():
         parser = argparse.ArgumentParser(
                         prog='Hangman',
                         description='guess words to win the game',
@@ -17,7 +20,8 @@ class GameInitiator:
                             help='an integer for the number of random words from the file')
         return parser.parse_args()
 
-    def select_words(self, filename: str, count: int = 15):
+    @staticmethod
+    def select_words(filename: str, count: int = 15):
         """
         Returns a list of words - lowercase letters.
         The default amout of words is 15, this function may take a while to finish.
@@ -53,41 +57,32 @@ class GamesRunner:
         for x in range(self.players_count):
             self.player_names[x] = input(f"#{x+1} player name: ").lower()
 
-    def updateWinner(self, game: Game):
+    def update_winner(self, game: Game):
         self.games_index += 1
-        winner = 0
-        top_score = game.players[winner].score
-        for x in range(self.players_count):
-            if game.players[x].score >= top_score:
-                winner = x
-                top_score = game.players[x].score
-        
-        print(f"{game.players[winner].name} - You Won!")
-        self.players_scores[winner] += 1
+        winner_index, winner = max(enumerate(game.players), key=lambda x: x[1].score)
+        print(f"{winner.name} - You Won!")
+        self.players_scores[winner_index] += 1
 
-    def printScores(self, game):
-        scores = ""
-        for x in range(self.players_count):
-            scores += f"{game.players[x].name}'s score: {self.players_scores[x]} "
+    def print_scores(self, game):
+        scores = " ".join(f"{player.name}'s score: {self.players_scores[idx]}" for idx, player in enumerate(game.players))
         print(scores)
     
-    def printStats(self, game: Game):
+    def print_stats(self, game: Game):
         stats = f"================================{self.games_index}/{self.games_count}======================scores:["
-        for x in range(self.players_count):
-            stats += f"{game.players[x].name}: {self.players_scores[x]} "
-        stats +="]"
+        stats += " ".join(f"{player.name}: {self.players_scores[idx]}" for idx, player in enumerate(game.players))
+        stats += "]"
         print(stats)
 
     def run_games(self):
         while(self.games_index < self.games_count):
             word = choice(self.words)
             game = Game(word, self.player_names)
-            self.printStats(game)
+            self.print_stats(game)
             game.play()
-            self.updateWinner(game)
-            self.printScores(game)
+            self.update_winner(game)
+            self.print_scores(game)
 
-        print(f"Hangman games have ended!")
+        print(f"Hangman games has ended!")
 
 def main():
     runner = GamesRunner()

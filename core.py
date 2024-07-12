@@ -7,7 +7,7 @@ class Player:
     name: str
     score: int = 0
 
-    def updateScore(self, count: int = 1):
+    def update_score(self, count: int = 1):
         self.score = self.score + count
 
 @dataclass
@@ -16,7 +16,7 @@ class GameState:
     word: str
     guessed_letters: Set[chr] = field(default_factory=set)
 
-    def printCurrentState(self):
+    def print_current_state(self):
         display = ''.join([letter if letter in self.guessed_letters else '_' for letter in self.word])
         print(display)
         print(f"Guessed Letters: {list(self.guessed_letters)}")

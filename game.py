@@ -3,6 +3,7 @@ from typing import List, Callable
 
 from core import GameState, Player
 
+
 class Game:
     """Class for keeping track of game play."""
     players: List[Player]
@@ -17,14 +18,14 @@ class Game:
         for idx, name in enumerate(playerNames):
             self.players[idx] = Player(name)
     
-    def next(self):
+    def move_to_next_player(self):
         self.current_turn = (self.current_turn + 1) % len(self.players)
 
-    def turn(self):
+    def turn(self) -> bool:
         current_player = self.players[self.current_turn]
-        gameFinished = self.turnLogic(current_player, self.game_state)
+        gameFinished = self.turn_logic(current_player, self.game_state)
         if not gameFinished:
-            self.next() # Move to the next player's turn
+            self.move_to_next_player()
         
         return gameFinished
     
@@ -33,50 +34,56 @@ class Game:
         while(not gameFinished):
             gameFinished = self.turn()
 
-    def printStats(self):
+    def print_stats(self):
         stats = "================================["
-        for x in range(len(self.players)):
-            stats += f"{self.players[x].name}: {self.players[x].score} "
+        stats += " ".join(f"{player.name}: {player.score}" for player in self.players)
         stats += f"]================================{list(self.game_state.guessed_letters)}============"
         print(stats)
     
-    # this logic can basically be external to the game
-    def turnLogic(self, player: Player, state: GameState):
+    def turn_logic(self, player: Player, state: GameState) -> bool:
         print(f"It's {player.name}'s turn, current score: {player.score}, if you want to type the whole word - enter *<word>")
-        
-        state.printCurrentState()
-        newGuess = False
-    
-        while not newGuess:
+        state.print_current_state()
+
+        while True:
             guess = input("Guess a letter: ").lower()
 
             if guess in state.guessed_letters:
                 print("You already guessed that letter. Try again.")
-            
-            else:
-                newGuess = True
+                continue
 
-                if guess[0] == "*" and guess[1:] == state.word:
-                    diff = set(self.game_state.word) - self.game_state.guessed_letters
-                    state.guessed_letters.update(diff)
-                    
-                    player.updateScore(len(diff))
-                    print(f"Congratulations! You guessed the word '{state.word}'.")
-                    self.printStats()
-                    return True
-                
-                state.guessed_letters.add(guess)
+            if self.process_guess(guess, player, state):
+                return True
 
-                if guess in state.word:
-                    player.updateScore()
-                    if set(state.word) <= state.guessed_letters:
-                        print(f"Congratulations! You guessed the word '{state.word}'.")
-                        return True
-                    
-                    print(f"You got it right!, if you want to type the whole word - enter *<word>")
-                    state.printCurrentState()
-                    newGuess = False
-                
-            self.printStats()
-                
+            self.print_stats()
+            if guess not in state.word:
+                break
+
+        return False
+
+    def process_guess(self, guess: str, player: Player, state: GameState) -> bool:
+        if guess[0] == '*' and guess[1:] == state.word:
+            return self.process_full_word_guess(player, state)
+
+        state.guessed_letters.add(guess)
+
+        if guess in state.word:
+            return self.process_correct_letter_guess(player, state)
+
+        return False
+
+    def process_full_word_guess(self, player: Player, state: GameState) -> bool:
+        diff = set(state.word) - state.guessed_letters
+        state.guessed_letters.update(diff)
+        player.update_score(len(diff))
+        print(f"Congratulations! You guessed the word '{state.word}'.")
+        self.print_stats()
+        return True
+
+    def process_correct_letter_guess(self, player: Player, state: GameState) -> bool:
+        player.update_score()
+        if set(state.word) <= state.guessed_letters:
+            print(f"Congratulations! You guessed the word '{state.word}'.")
+            return True
+        print("You got it right!, if you want to type the whole word - enter *<word>")
+        state.print_current_state()
         return False
